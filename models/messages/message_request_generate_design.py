@@ -5,6 +5,7 @@ from dataclasses_json import dataclass_json
 @dataclass
 @dataclass_json
 class MessageRequestGenerateDesign:
+  api_key: str = ''
   title: str = ''
   desc: str = ''
   design_uuid: str = ''
