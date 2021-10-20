@@ -10,4 +10,4 @@ class MessageRequestGenerateDesign:
     description: str = ''
     design_uuid: str = ''
     qr_img_file_name: str = ''
-    world_img_file_name: str = ''
+    height_map_img_file_name: str = ''
