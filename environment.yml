@@ -16,24 +16,23 @@ dependencies:
   - wheel=0.37.0=pyhd3eb1b0_1
   - wincertstore=0.2=py38haa95532_2
   - pip:
-    - anyio==3.3.2
-    - asgiref==3.4.1
-    - click==8.0.2
-    - colorama==0.4.4
-    - dataclasses-json==0.5.6
-    - fastapi==0.70.0
-    - gunicorn==20.1.0
-    - h11==0.12.0
-    - idna==3.2
-    - marshmallow==3.13.0
-    - marshmallow-enum==1.5.1
-    - mypy-extensions==0.4.3
-    - pydantic==1.8.2
-    - python-multipart==0.0.5
-    - six==1.16.0
-    - sniffio==1.2.0
-    - starlette==0.16.0
-    - typing-extensions==3.10.0.2
-    - typing-inspect==0.7.1
-    - uvicorn==0.15.0
-prefix: D:\ProgramData\Anaconda\envs\geo-hackathon
+      - anyio==3.3.2
+      - asgiref==3.4.1
+      - click==8.0.2
+      - colorama==0.4.4
+      - dataclasses-json==0.5.6
+      - fastapi==0.70.0
+      - gunicorn==20.1.0
+      - h11==0.12.0
+      - idna==3.2
+      - marshmallow==3.13.0
+      - marshmallow-enum==1.5.1
+      - mypy-extensions==0.4.3
+      - pydantic==1.8.2
+      - python-multipart==0.0.5
+      - six==1.16.0
+      - sniffio==1.2.0
+      - starlette==0.16.0
+      - typing-extensions==3.10.0.2
+      - typing-inspect==0.7.1
+      - uvicorn==0.15.0
