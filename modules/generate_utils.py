@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
-import textwrap
+import numpy as np
+import textwrap3, cv2
 
 class ImageGenerator():
     im_size = (1620, 2160)
@@ -10,6 +11,39 @@ class ImageGenerator():
     title_font = ImageFont.truetype("public/fonts/ralevay_font.ttf", size=170)
     name_font = ImageFont.truetype("public/fonts/ralevay_font.ttf", size=75)
     black = (0,0,0)
+    lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
+
+    #plottvist this one dravs maps
+    def DravMap(h_map, img):
+        background = np.fromstring(h_map, dtype=np.uint8)
+        background = background.reshape((640,640,3))  #te vajag zināt height map izmēru un vai tas ir RGB/RGBA
+        background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
+        img = cv2.resize(img, (810,810), interpolation = cv2.INTER_AREA)
+        background = cv2.resize(background, (810,810), interpolation = cv2.INTER_AREA)
+        background = cv2.medianBlur(background, 21)
+        rows, cols = (810,810)
+
+        img_output = np.zeros((810,810,4), dtype=img.dtype)
+
+        #cycles trough each pixel
+        for i in range(rows):
+            for j in range(cols):
+        
+                #gets rid of the darkest and brightest pixels
+                if background[i,j]> 240:
+                    background[i,j] = 240
+                elif background[i,j]< 15:
+                    background[i,j] = 15    
+
+                offset_y = int((background[i,j]-15)*0.35)
+                #shifts the pixels upvards
+                if i+offset_y < rows:
+                    img_output[i,j] = img[(i+offset_y)%rows,j]
+                else:
+                    img_output[i,j][0] = 0
+
+        img_output = cv2.cvtColor(img_output, cv2.COLOR_BGRA2RGBA)
+        return img_output.tobytes()
 
     #horizontal paragraph aka spaghetti code
     def draw_multiple_line_text(image, text, font, text_color, text_start_height, vidth):
@@ -48,7 +82,7 @@ class ImageGenerator():
         return  im.rotate(-90).crop((690,0,1110,1110))
 
     #ignorēt to kas tur augšā. te tas svarīgais
-    def generate_image(location_name, code_img, map_img, name_surname, bottom_text, side_text):
+    def generate_image(location_name, code_img, map_img, bottom_text, side_text):
         im = Image.new(mode="RGBA", size=ImageGenerator.im_size, color=(255,0,255,0))
         d = ImageDraw.Draw(im)
 
@@ -57,24 +91,22 @@ class ImageGenerator():
         d.rectangle((ImageGenerator.map_size[0]+45,255,
         ImageGenerator.map_size[0]+46,300 + ImageGenerator.map_size[1]), fill=ImageGenerator.black)
 
-        #these add images
-        tobytes = b'\xbf\x8cd\xba\x7f\xe0\xf0\xb8t\xfe'
-        
+        #these add images        
         offset = (1020,1455)
-        code_r = Image.frombytes('RGB', (474, 266), code_img, 'raw')#te vajag zināt attēla dimensijas
+        code_r = Image.frombytes('RGB', (1200,1200), code_img, 'raw') #te vajag zināt qr_coda izmēru
         code_r = code_r.resize(ImageGenerator.code_size)
         im.paste(code_r, offset)
 
         offset = (0, 300)
-        map_r = Image.frombytes('RGB', (474, 266), code_img, 'raw')
+        map_r = Image.frombytes('RGBA', (810,810), ImageGenerator.DravMap(map_img, ImageGenerator.lines), 'raw')
         map_r = map_r.resize(ImageGenerator.map_size)
         im.paste(map_r, offset)
 
         #these lines add titles
-        d.text((ImageGenerator.im_size[0]/2,120),anchor="mt", align="center",
+        d.text((ImageGenerator.im_size[0]/2,215),anchor="mb", align="center",
         text=location_name.upper(), font=ImageGenerator.title_font, fill=ImageGenerator.title_color)
         d.text((975,1455),anchor="rt", align="center",
-        text=name_surname.upper(), font=ImageGenerator.name_font, fill=ImageGenerator.black)
+        text="HUMBOLDT.", font=ImageGenerator.name_font, fill=ImageGenerator.black)
 
         #these ones add paragraphs
         ImageGenerator.draw_multiple_line_text(im, bottom_text, ImageGenerator.text_font, ImageGenerator.black, 2055, 45)
