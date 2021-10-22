@@ -11,3 +11,7 @@ class MessageRequestGenerateDesign:
     design_uuid: str = ''
     qr_img_file_name: str = ''
     height_map_img_file_name: str = ''
+    west: float = .0
+    north: float = .0
+    east: float = .0
+    south: float = .0
