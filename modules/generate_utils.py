@@ -1,4 +1,5 @@
 import io
+from PIL.TiffImagePlugin import TiffImageFile
 from PIL import Image, ImageDraw, ImageFont
 from models.common.lat_lng_bounds import LatLngBounds
 import requests
@@ -101,13 +102,22 @@ class ImageGenerator():
     def generate_qr_img(text: str):
         qr_code_img = None
         try:
-            qr_code_img = qrcode.make(text)
-            print(type(qr_code_img))
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=50,
+                border=0,
+            )
+
+            qr.add_data(text)
+            qr.make(fit=True)
+
+            qr_code_img = qr.make_image(fill_color="black", back_color="white")
         except Exception as e:
             LoggingUtils.log_exception(e)
         return qr_code_img
 
-    @staticmethod
+    @ staticmethod
     def generate_elevation_map_img(bounds: LatLngBounds):
         elevation_map_img = None
         try:
@@ -120,6 +130,6 @@ class ImageGenerator():
             LoggingUtils.log_exception(e)
         return elevation_map_img
 
-    @staticmethod
-    def generate_normal_map_img():
+    @ staticmethod
+    def generate_normal_map_img(elevation_map: TiffImageFile):
         pass

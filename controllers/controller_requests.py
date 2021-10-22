@@ -1,4 +1,5 @@
 import io
+import os
 import aiofiles
 import requests
 import uuid
@@ -6,7 +7,7 @@ import qrcode
 from PIL import Image
 from fastapi import UploadFile
 from modules.generate_utils import ImageGenerator
-from modules.consts import PATH_3D_WORLD, PATH_STATIC
+from modules.consts import HOST, PATH_3D_WORLD, PATH_STATIC, PATH_STATIC_ABSOLUTE
 
 from models.enums.enum_error_code import ErrorCode
 from models.enums.enum_error_message import ErrorMessage
@@ -46,13 +47,16 @@ class ControllerRequests:
                 qr_code_img = ImageGenerator.generate_qr_img(
                     f'{PATH_3D_WORLD}/{request.design_uuid}')
 
-                save_path = f'{PATH_STATIC}/{request_uuid}'
+                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
+                os.mkdir(save_path)
 
                 elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
                 qr_code_img.save(f'{save_path}/qr.png', 'PNG')
 
-                response.is_success = True
+                response.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
+                response.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
                 response.design_uuid = request_uuid
+                response.is_success = True
         except Exception as e:
             LoggingUtils.log_exception(e)
         return response
