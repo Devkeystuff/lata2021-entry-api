@@ -45,7 +45,6 @@ async def generate_design(
     east: float = Query(...),
     south: float = Query(...),
 ):
-    print(api_key)
     response = None
     try:
         message_request_generate_design = MessageRequestGenerateDesign()

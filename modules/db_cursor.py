@@ -1,15 +1,18 @@
 import os
 import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class DbCursor(object):
     def __init__(self):
         super().__init__()
         self.conn = psycopg2.connect(
-            f'dbname={os.environ["DB_DATABASE"]} '
-            f'user={os.environ["DB_USER"]} '
-            f'host={os.environ["DB_HOST"]} '
-            f'password={os.environ["DB_PASS"]} '
+            f'dbname={os.getenv("DB_DATABASE")} '
+            f'user={os.getenv("DB_USER")} '
+            f'host={os.getenv("DB_HOST")} '
+            f'password={os.getenv("DB_PASS")} '
         )
         self.cursor = None
 

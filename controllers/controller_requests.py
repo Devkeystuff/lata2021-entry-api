@@ -7,7 +7,7 @@ import qrcode
 from PIL import Image
 from fastapi import UploadFile
 from modules.generate_utils import ImageGenerator
-from modules.consts import HOST, PATH_3D_WORLD, PATH_STATIC, PATH_STATIC_ABSOLUTE
+from modules.consts import HOST, PATH_3D_WORLD, PATH_PUBLIC, PATH_STATIC, PATH_STATIC_ABSOLUTE
 
 from models.enums.enum_error_code import ErrorCode
 from models.enums.enum_error_message import ErrorMessage
@@ -46,11 +46,15 @@ class ControllerRequests:
                     bounds)
                 qr_code_img = ImageGenerator.generate_qr_img(
                     f'{PATH_3D_WORLD}/{request.design_uuid}')
-                design_img = ImageGenerator.generate_design_image(
-                    location_name=request.title, side_text=request.description, )
-                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
-                os.mkdir(save_path)
 
+                distorted_map_img = ImageGenerator.generate_distorted_map(
+                    h_map=elevation_map_img, img=f'{PATH_PUBLIC}/images/lines.png')
+                design_img = ImageGenerator.generate_design_image(
+                    location_name=request.title, side_text=request.description, map_img=distorted_map_img, qr_code_img=qr_code_img)
+
+                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
+
+                os.mkdir(save_path)
                 elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
                 qr_code_img.save(f'{save_path}/qr.png', 'PNG')
 
