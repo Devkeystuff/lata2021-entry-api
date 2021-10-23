@@ -1,11 +1,13 @@
 import io
 from PIL.TiffImagePlugin import TiffImageFile
 from PIL import Image, ImageDraw, ImageFont
+from models.common.design_bottom_text import DesignBottomText
 from models.common.lat_lng_bounds import LatLngBounds
 import requests
 from modules.logging_utils import LoggingUtils
 import qrcode
 import textwrap3
+import json
 
 
 class ImageGenerator():
@@ -57,9 +59,24 @@ class ImageGenerator():
 
         return im.rotate(-90).crop((690, 0, 1110, 1110))
 
+    @staticmethod
+    def get_bottom_text() -> DesignBottomText:
+        result = None
+        try:
+            result = DesignBottomText()
+            f = json.load('public/edition/edition.json')
+            result.title = f['title']
+            result.description = f['description']
+            print(f)
+        except Exception as e:
+            LoggingUtils.log_exception(e)
+        return f
+
     # ignorēt to kas tur augšā. te tas svarīgais
     @staticmethod
-    def generate_image(location_name, code_img, map_img, name_surname, bottom_text, side_text):
+    def generate_design_image(location_name, qr_code_img, map_img, side_text):
+        bottom_section = ImageGenerator.get_bottom_text()
+
         im = Image.new(mode="RGBA", size=ImageGenerator.im_size,
                        color=(255, 0, 255, 0))
         d = ImageDraw.Draw(im)
@@ -75,12 +92,12 @@ class ImageGenerator():
 
         offset = (1020, 1455)
         # te vajag zināt attēla dimensijas
-        code_r = Image.frombytes('RGB', (474, 266), code_img, 'raw')
+        code_r = Image.frombytes('RGB', (474, 266), qr_code_img, 'raw')
         code_r = code_r.resize(ImageGenerator.code_size)
         im.paste(code_r, offset)
 
         offset = (0, 300)
-        map_r = Image.frombytes('RGB', (474, 266), code_img, 'raw')
+        map_r = Image.frombytes('RGB', (474, 266), qr_code_img, 'raw')
         map_r = map_r.resize(ImageGenerator.map_size)
         im.paste(map_r, offset)
 
@@ -88,15 +105,15 @@ class ImageGenerator():
         d.text((ImageGenerator.im_size[0]/2, 120), anchor="mt", align="center",
                text=location_name.upper(), font=ImageGenerator.title_font, fill=ImageGenerator.title_color)
         d.text((975, 1455), anchor="rt", align="center",
-               text=name_surname.upper(), font=ImageGenerator.name_font, fill=ImageGenerator.black)
+               text=bottom_section.title.upper(), font=ImageGenerator.name_font, fill=ImageGenerator.black)
 
         # these ones add paragraphs
         ImageGenerator.draw_multiple_line_text(
-            im, bottom_text, ImageGenerator.text_font, ImageGenerator.black, 2055, 45)
+            im, bottom_section.description, ImageGenerator.text_font, ImageGenerator.black, 2055, 45)
         im.paste(ImageGenerator.draw_multiple_line_text_y(
             side_text, ImageGenerator.text_font, ImageGenerator.black), (1200, 300))
 
-        return im.tobytes()
+        return im
 
     @staticmethod
     def generate_qr_img(text: str):
@@ -108,10 +125,8 @@ class ImageGenerator():
                 box_size=50,
                 border=0,
             )
-
             qr.add_data(text)
             qr.make(fit=True)
-
             qr_code_img = qr.make_image(fill_color="black", back_color="white")
         except Exception as e:
             LoggingUtils.log_exception(e)

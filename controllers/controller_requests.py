@@ -46,7 +46,8 @@ class ControllerRequests:
                     bounds)
                 qr_code_img = ImageGenerator.generate_qr_img(
                     f'{PATH_3D_WORLD}/{request.design_uuid}')
-
+                design_img = ImageGenerator.generate_design_image(
+                    location_name=request.title, side_text=request.description, )
                 save_path = f'{PATH_STATIC}/resources/{request_uuid}'
                 os.mkdir(save_path)
 

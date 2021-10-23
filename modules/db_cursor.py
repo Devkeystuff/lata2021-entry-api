@@ -1,15 +1,15 @@
+import os
 import psycopg2
-from modules.consts import DB_HOST, DB_PASS, DB_USER, DB_DATABASE
 
 
 class DbCursor(object):
     def __init__(self):
         super().__init__()
         self.conn = psycopg2.connect(
-            f'dbname={DB_DATABASE} '
-            f'user={DB_USER} '
-            f'host={DB_HOST} '
-            f'password={DB_PASS} '
+            f'dbname={os.environ["DB_DATABASE"]} '
+            f'user={os.environ["DB_USER"]} '
+            f'host={os.environ["DB_HOST"]} '
+            f'password={os.environ["DB_PASS"]} '
         )
         self.cursor = None
 
