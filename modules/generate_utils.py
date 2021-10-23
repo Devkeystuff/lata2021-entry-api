@@ -9,6 +9,10 @@ import qrcode
 import textwrap3
 import json
 
+import numpy as np
+import textwrap3
+import cv2
+
 
 class ImageGenerator():
     im_size = (1620, 2160)
@@ -19,6 +23,41 @@ class ImageGenerator():
     title_font = ImageFont.truetype("public/fonts/ralevay_font.ttf", size=170)
     name_font = ImageFont.truetype("public/fonts/ralevay_font.ttf", size=75)
     black = (0, 0, 0)
+    lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
+
+    # plottvist this one dravs maps
+    def DravMap(h_map, img):
+        background = np.fromstring(h_map, dtype=np.uint8)
+        # te vajag zināt height map izmēru un vai tas ir RGB/RGBA
+        background = background.reshape((640, 640, 3))
+        background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
+        img = cv2.resize(img, (810, 810), interpolation=cv2.INTER_AREA)
+        background = cv2.resize(background, (810, 810),
+                                interpolation=cv2.INTER_AREA)
+        background = cv2.medianBlur(background, 21)
+        rows, cols = (810, 810)
+
+        img_output = np.zeros((810, 810, 4), dtype=img.dtype)
+
+        # cycles trough each pixel
+        for i in range(rows):
+            for j in range(cols):
+
+                # gets rid of the darkest and brightest pixels
+                if background[i, j] > 240:
+                    background[i, j] = 240
+                elif background[i, j] < 15:
+                    background[i, j] = 15
+
+                offset_y = int((background[i, j]-15)*0.35)
+                # shifts the pixels upvards
+                if i+offset_y < rows:
+                    img_output[i, j] = img[(i+offset_y) % rows, j]
+                else:
+                    img_output[i, j][0] = 0
+
+        img_output = cv2.cvtColor(img_output, cv2.COLOR_BGRA2RGBA)
+        return img_output.tobytes()
 
     # horizontal paragraph aka spaghetti code
     @staticmethod
