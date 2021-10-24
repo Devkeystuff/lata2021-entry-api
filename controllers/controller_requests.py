@@ -20,6 +20,8 @@ from controllers.controller_database import ControllerDatabase
 
 from models.messages.message_request_generate_design import MessageRequestGenerateDesign
 from models.messages.message_response_generate_design import MessageResponseGenerateDesign
+from models.messages.message_request_get_design import MessageRequestGetDesign
+from models.messages.message_response_get_design import MessageResponseGetDesign
 
 
 class ControllerRequests:
@@ -34,8 +36,6 @@ class ControllerRequests:
                 request_uuid = str(uuid.uuid4())
                 request.design_uuid = request_uuid
 
-                # ControllerDatabase.insert_design(design=request)
-
                 bounds = LatLngBounds(
                     west=request.west,
                     north=request.north,
@@ -49,18 +49,59 @@ class ControllerRequests:
 
                 distorted_map_img = ImageGenerator.generate_distorted_map(
                     h_map=elevation_map_img, img=f'{PATH_PUBLIC}/images/lines.png')
+                bottom_text = ImageGenerator.get_bottom_text()
                 design_img = ImageGenerator.generate_design_image(
-                    location_name=request.title, side_text=request.description, map_img=distorted_map_img, qr_code_img=qr_code_img)
+                    location_name=request.title,
+                    side_text=request.description,
+                    map_img=distorted_map_img,
+                    qr_code_img=qr_code_img,
+                    bottom_title=bottom_text.title,
+                    bottom_desc=bottom_text.description
+                )
 
                 save_path = f'{PATH_STATIC}/resources/{request_uuid}'
 
                 os.mkdir(save_path)
                 elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
                 qr_code_img.save(f'{save_path}/qr.png', 'PNG')
+                design_img.save(f'{save_path}/design.png', 'PNG')
 
+                request.edition_title = bottom_text.title
+                request.edition_desc = bottom_text.description
+                request.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
+                request.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
+                request.lines_design_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/design.png'
+                ControllerDatabase.insert_design(design=request)
+
+                response.edition_title = bottom_text.title
+                response.edition_desc = bottom_text.description
                 response.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
                 response.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
+                response.lines_design_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/design.png'
                 response.design_uuid = request_uuid
+                response.is_success = True
+        except Exception as e:
+            LoggingUtils.log_exception(e)
+        return response
+
+    @staticmethod
+    def get_design(request: MessageRequestGetDesign) -> MessageResponseGetDesign:
+        response = None
+        try:
+            response = MessageResponseGetDesign()
+            if ControllerRequests.validate_request(request, response):
+                design = ControllerDatabase.get_design_by_uuid(
+                    uuid=request.design_uuid)
+                response.design_id = design.design_id
+                response.design_uuid = design.design_uuid
+                response.qr_code_img = design.qr_code_img
+                response.elevation_map_img = design.elevation_map_img
+                response.lines_design_img = design.lines_design_img
+                response.title = design.title
+                response.description = design.description
+                response.edition_title = design.edition_title
+                response.edition_desc = design.edition_desc
+
                 response.is_success = True
         except Exception as e:
             LoggingUtils.log_exception(e)

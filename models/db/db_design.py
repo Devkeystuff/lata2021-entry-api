@@ -3,13 +3,18 @@ from dataclasses_json import dataclass_json
 import time
 
 
-@dataclass
 @dataclass_json
+@dataclass
 class DbDesign:
-  design_id: int = 0
-  design_uuid: str = ''
-  qr_img_file_name: str = ''
-  world_img_file_name: str = ''
-  is_deleted: bool = False
-  created: float = time.time()
-  modified: float = time.time()
+    design_id: int = 0
+    design_uuid: str = ''
+    title: str = ''
+    description: str = ''
+    qr_code_img: str = ''
+    elevation_map_img: str = ''
+    lines_design_img: str = ''
+    edition_title: str = ''
+    edition_desc: str = ''
+    is_deleted: bool = False
+    created: float = time.time()
+    modified: float = time.time()

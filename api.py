@@ -8,6 +8,8 @@ from starlette.responses import Response
 
 from models.messages.message_request_generate_design import MessageRequestGenerateDesign
 from models.messages.message_response_generate_design import MessageResponseGenerateDesign
+from models.messages.message_request_get_design import MessageRequestGetDesign
+from models.messages.message_response_get_design import MessageResponseGetDesign
 
 from controllers.controller_requests import ControllerRequests
 
@@ -63,6 +65,24 @@ async def generate_design(
     except Exception as e:
         LoggingUtils.log_exception(e)
     return Response(content=response.to_json(), media_type='application/json')
+
+
+@app.post('/get_design', response_model=MessageResponseGetDesign)
+async def get_design(
+    api_key: str = Query(...),
+    design_uuid: str = Query(...)
+):
+    response = None
+    try:
+        message_request_get_design = MessageRequestGetDesign()
+        message_request_get_design.api_key = api_key
+        message_request_get_design.design_uuid = design_uuid
+
+        response = ControllerRequests.get_design(
+            request=message_request_get_design)
+    except Exception as e:
+        LoggingUtils.log_exception(e)
+    return response
 
 if __name__ == '__main__':
     uvicorn.run(

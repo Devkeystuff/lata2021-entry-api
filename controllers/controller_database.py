@@ -16,10 +16,13 @@ class ControllerDatabase:
         try:
             cols = [
                 'design_uuid',
-                'qr_img_file_name',
-                'world_img_file_name',
+                'qr_code_img',
+                'elevation_map_img',
+                'lines_design_img',
                 'title',
                 'description',
+                'edition_title',
+                'edition_desc'
             ]
             with DbCursor() as cursor:
                 cursor.execute(
@@ -67,3 +70,41 @@ class ControllerDatabase:
         except Exception as e:
             LoggingUtils.log_exception(e)
         return client
+
+    @staticmethod
+    def get_design_by_uuid(uuid: str) -> DbDesign:
+        design = None
+        try:
+            with DbCursor() as cursor:
+                cursor.execute(
+                    f'SELECT '
+                    f'design_id, '
+                    f'design_uuid, '
+                    f'title, '
+                    f'description, '
+                    f'qr_code_img, '
+                    f'elevation_map_img, '
+                    f'lines_design_img, '
+                    f'edition_title, '
+                    f'edition_desc '
+                    f'FROM designs '
+                    f'WHERE design_uuid=%(uuid)s '
+                    f'AND NOT is_deleted '
+                    f'LIMIT 1',
+                    {
+                        'uuid': uuid
+                    }
+                )
+                row = cursor.fetchone()
+                if row:
+                    columns = [it[0] for it in cursor.description]
+                    print(columns)
+                    design_dict = dict(zip(columns, row))
+                    design = from_dict(
+                        data_class=DbDesign,
+                        data=design_dict,
+                        config=Config(check_types=False)
+                    )
+        except Exception as e:
+            LoggingUtils.log_exception(e)
+        return design

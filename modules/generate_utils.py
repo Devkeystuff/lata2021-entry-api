@@ -7,8 +7,8 @@ from models.common.lat_lng_bounds import LatLngBounds
 import requests
 from modules.logging_utils import LoggingUtils
 import qrcode
-import textwrap3
 import json
+from modules.consts import PATH_PUBLIC
 
 import numpy as np
 import textwrap3
@@ -114,20 +114,19 @@ class ImageGenerator():
         result = None
         try:
             result = DesignBottomText()
-            f = json.load('public/edition/edition.json')
-            result.title = f['title']
-            result.description = f['description']
+            f = open(f'{PATH_PUBLIC}/edition/edition.json',)
+            data = json.load(f)
+            result.title = data['title']
+            result.description = data['description']
         except Exception as e:
             LoggingUtils.log_exception(e)
         return result
 
     # ignorēt to kas tur augšā. te tas svarīgais
     @staticmethod
-    def generate_design_image(location_name, qr_code_img, map_img: PilImage, side_text) -> PilImage:
+    def generate_design_image(location_name, qr_code_img, map_img: PilImage, side_text, bottom_title, bottom_desc) -> PilImage:
         result = None
         try:
-            bottom_section = ImageGenerator.get_bottom_text()
-
             result = Image.new(mode="RGBA", size=ImageGenerator.im_size,
                                color=(255, 0, 255, 0))
             d = ImageDraw.Draw(result)
@@ -148,7 +147,7 @@ class ImageGenerator():
             result.paste(code_r, offset)
 
             offset = (0, 300)
-            map_r = Image.frombytes('RGBA', (810, 810), ImageGenerator.DravMap(
+            map_r = Image.frombytes('RGBA', (810, 810), ImageGenerator.generate_distorted_map(
                 map_img, ImageGenerator.lines), 'raw')
             map_r = map_r.resize(ImageGenerator.map_size)
             result.paste(map_r, offset)
@@ -157,11 +156,11 @@ class ImageGenerator():
             d.text((ImageGenerator.im_size[0]/2, 120), anchor="mt", align="left",
                    text=location_name.upper(), font=ImageGenerator.title_font, fill=ImageGenerator.title_color)
             d.text((975, 1455), anchor="rt", align="center",
-                   text=bottom_section.title.upper(), font=ImageGenerator.name_font, fill=ImageGenerator.black)
+                   text=bottom_title.upper(), font=ImageGenerator.name_font, fill=ImageGenerator.black)
 
             # these ones add paragraphs
             ImageGenerator.draw_multiple_line_text(
-                result, bottom_section.description, ImageGenerator.text_font, ImageGenerator.black, 2055, 45)
+                result, bottom_desc, ImageGenerator.text_font, ImageGenerator.black, 2055, 45)
             result.paste(ImageGenerator.draw_multiple_line_text_y(
                 side_text, ImageGenerator.text_font, ImageGenerator.black), (1200, 300))
         except Exception as e:

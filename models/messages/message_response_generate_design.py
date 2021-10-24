@@ -9,8 +9,9 @@ class MessageResponseGenerateDesign:
     design_uuid: str = ''
     qr_code_img: str = ''
     elevation_map_img: str = ''
-    normal_map_img: str = ''
-    design_img: str = ''
+    lines_design_img: str = ''
+    edition_title: str = ''
+    edition_desc: str = ''
     is_success: bool = False
     error_code: int = 0
     error_desc: str = ''

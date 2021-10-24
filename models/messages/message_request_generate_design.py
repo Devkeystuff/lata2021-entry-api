@@ -9,8 +9,11 @@ class MessageRequestGenerateDesign:
     title: str = ''
     description: str = ''
     design_uuid: str = ''
-    qr_img_file_name: str = ''
-    height_map_img_file_name: str = ''
+    qr_code_img: str = ''
+    elevation_map_img: str = ''
+    lines_design_img: str = ''
+    edition_title: str = ''
+    edition_desc: str = ''
     west: float = .0
     north: float = .0
     east: float = .0
