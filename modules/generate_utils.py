@@ -26,12 +26,12 @@ class ImageGenerator():
     black = (0, 0, 0)
     lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
 
-    def generate_distorted_map(h_map: bytes, img):
+    def generate_distorted_map(h_map: bytes, img, map_dimensions):
         result = None
         try:
             background = np.fromstring(h_map, dtype=np.uint8)
             # te vajag zināt height map izmēru un vai tas ir RGB/RGBA
-            background = background.reshape((640, 640, 3))
+            background = background.reshape((map_dimensions[0],map_dimensions[1], 3))
             background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
             img = cv2.resize(img, (810, 810), interpolation=cv2.INTER_AREA)
             background = cv2.resize(background, (810, 810),
@@ -123,7 +123,7 @@ class ImageGenerator():
 
     # ignorēt to kas tur augšā. te tas svarīgais
     @staticmethod
-    def generate_design_image(location_name, qr_code_img, map_img: PilImage, side_text) -> PilImage:
+    def generate_design_image(location_name, qr_code_img, qr_code_dimensions, map_img: PilImage, map_dimensions, side_text) -> PilImage:
         result = None
         try:
             bottom_section = ImageGenerator.get_bottom_text()
@@ -139,17 +139,14 @@ class ImageGenerator():
                         ImageGenerator.map_size[0]+46, 300 + ImageGenerator.map_size[1]), fill=ImageGenerator.black)
 
             # Add images
-            tobytes = b'\xbf\x8cd\xba\x7f\xe0\xf0\xb8t\xfe'
-
             offset = (1020, 1455)
-            # te vajag zināt attēla dimensijas
-            code_r = Image.frombytes('RGB', (474, 266), qr_code_img, 'raw')
+            code_r = Image.frombytes('RGB', qr_code_dimensions, qr_code_img, 'raw')
             code_r = code_r.resize(ImageGenerator.code_size)
             result.paste(code_r, offset)
 
             offset = (0, 300)
-            map_r = Image.frombytes('RGBA', (810, 810), ImageGenerator.DravMap(
-                map_img, ImageGenerator.lines), 'raw')
+            map_r = Image.frombytes('RGBA', (810, 810), ImageGenerator.generate_distorted_map(
+                map_img, ImageGenerator.lines, map_dimensions), 'raw')
             map_r = map_r.resize(ImageGenerator.map_size)
             result.paste(map_r, offset)
 
