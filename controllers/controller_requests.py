@@ -1,10 +1,18 @@
+import io
+import os
 import aiofiles
+import requests
 import uuid
+import qrcode
+from PIL import Image
 from fastapi import UploadFile
-from modules import consts
+from modules.generate_utils import ImageGenerator
+from modules.consts import HOST, PATH_3D_WORLD, PATH_PUBLIC, PATH_STATIC, PATH_STATIC_ABSOLUTE
 
 from models.enums.enum_error_code import ErrorCode
 from models.enums.enum_error_message import ErrorMessage
+
+from models.common.lat_lng_bounds import LatLngBounds
 
 from modules.logging_utils import LoggingUtils
 
@@ -17,31 +25,43 @@ from models.messages.message_response_generate_design import MessageResponseGene
 class ControllerRequests:
     @staticmethod
     async def generate_design(
-            request: MessageRequestGenerateDesign,
-            qr_image: UploadFile,
-            world_image: UploadFile
+        request: MessageRequestGenerateDesign,
     ) -> MessageResponseGenerateDesign:
         response = None
         try:
             response = MessageResponseGenerateDesign()
             if ControllerRequests.validate_request(request, response):
-                if ControllerRequests.validate_image_file(qr_image, response):
-                    if ControllerRequests.validate_gltf_file(world_image, response):
-                        request_uuid = str(uuid.uuid4())
-                        request.design_uuid = request_uuid
+                request_uuid = str(uuid.uuid4())
+                request.design_uuid = request_uuid
 
-                        ControllerDatabase.insert_design(design=request)
+                # ControllerDatabase.insert_design(design=request)
 
-                        qr_file_extension = qr_image.filename.split('.')[-1]
-                        world_file_extension = world_image.filename.split('.')[-1]
-                        qr_file_source = f'{consts.PATH_QR_IMG}/{request_uuid}.{qr_file_extension}'
-                        world_file_source = f'{consts.PATH_WORLD_IMG}/{request_uuid}.{world_file_extension}'
+                bounds = LatLngBounds(
+                    west=request.west,
+                    north=request.north,
+                    east=request.east,
+                    south=request.south
+                )
+                elevation_map_img = ImageGenerator.generate_elevation_map_img(
+                    bounds)
+                qr_code_img = ImageGenerator.generate_qr_img(
+                    f'{PATH_3D_WORLD}/{request.design_uuid}')
 
-                        await ControllerRequests.write_file(qr_file_source, qr_image)
-                        await ControllerRequests.write_file(world_file_source, world_image)
+                distorted_map_img = ImageGenerator.generate_distorted_map(
+                    h_map=elevation_map_img, img=f'{PATH_PUBLIC}/images/lines.png')
+                design_img = ImageGenerator.generate_design_image(
+                    location_name=request.title, side_text=request.description, map_img=distorted_map_img, qr_code_img=qr_code_img)
 
-                        response.is_success = True
-                        response.design_uuid = request_uuid
+                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
+
+                os.mkdir(save_path)
+                elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
+                qr_code_img.save(f'{save_path}/qr.png', 'PNG')
+
+                response.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
+                response.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
+                response.design_uuid = request_uuid
+                response.is_success = True
         except Exception as e:
             LoggingUtils.log_exception(e)
         return response
@@ -74,11 +94,11 @@ class ControllerRequests:
         return status
 
     @staticmethod
-    def validate_gltf_file(file: UploadFile, response):
+    def validate_tiff_file(file: UploadFile, response):
         status = False
         try:
             file_extension = file.filename.split('.')[-1]
-            if file_extension == 'gltf':
+            if file_extension == 'tif':
                 status = True
             else:
                 response.error_code = ErrorCode.WRONG_FILE_FORMAT.value
