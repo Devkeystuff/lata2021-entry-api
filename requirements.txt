@@ -1,7 +1,6 @@
 anyio==3.3.2
 asgiref==3.4.1
 astroid==2.8.3
-autopep8 @ file:///tmp/build/80754af9/autopep8_1620866417880/work
 certifi==2021.5.30
 charset-normalizer==2.0.7
 click==8.0.2
@@ -26,8 +25,7 @@ opencv-python==4.5.3.56
 pep8==1.7.1
 Pillow==8.3.1
 platformdirs==2.4.0
-psycopg2 @ file:///C:/ci/psycopg2_1612298803839/work
-pycodestyle @ file:///tmp/build/80754af9/pycodestyle_1615748559966/work
+psycopg2==2.9.1
 pydantic==1.8.2
 pylint==2.11.1
 pyparsing==2.4.7
@@ -40,7 +38,6 @@ six==1.16.0
 sniffio==1.2.0
 starlette==0.16.0
 textwrap3==0.9.2
-toml @ file:///tmp/build/80754af9/toml_1616166611790/work
 typing-extensions==3.10.0.2
 typing-inspect==0.7.1
 urllib3==1.26.7
