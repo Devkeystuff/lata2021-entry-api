@@ -26,12 +26,13 @@ class ImageGenerator():
     black = (0, 0, 0)
     lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
 
-    def generate_distorted_map(h_map: bytes, img):
+    def generate_distorted_map(h_map: bytes, img, map_dimensions):
         result = None
         try:
             background = np.fromstring(h_map, dtype=np.uint8)
             # te vajag zināt height map izmēru un vai tas ir RGB/RGBA
-            background = background.reshape((640, 640, 3))
+            background = background.reshape(
+                (map_dimensions[0], map_dimensions[1], 3))
             background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
             img = cv2.resize(img, (810, 810), interpolation=cv2.INTER_AREA)
             background = cv2.resize(background, (810, 810),
