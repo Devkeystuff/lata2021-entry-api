@@ -1,10 +1,5 @@
-import io
 import os
-import aiofiles
-import requests
 import uuid
-import qrcode
-from PIL import Image
 from fastapi import UploadFile
 from modules.generate_utils import ImageGenerator
 from modules.consts import HOST, PATH_3D_WORLD, PATH_PUBLIC, PATH_STATIC, PATH_STATIC_ABSOLUTE
@@ -158,12 +153,3 @@ class ControllerRequests:
         except Exception as e:
             LoggingUtils.log_exception(e)
         return status
-
-    @staticmethod
-    async def write_file(path: str, file):
-        try:
-            async with aiofiles.open(path, 'wb') as out_file:
-                content = await file.read()
-                await out_file.write(content)
-        except Exception as e:
-            LoggingUtils.log_exception(e)
