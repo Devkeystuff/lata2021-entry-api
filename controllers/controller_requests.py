@@ -1,5 +1,6 @@
 import os
 import uuid
+from PIL import Image
 from fastapi import UploadFile
 from modules.generate_utils import ImageGenerator
 from modules.consts import HOST, PATH_3D_WORLD, PATH_PUBLIC, PATH_STATIC, PATH_STATIC_ABSOLUTE
@@ -37,13 +38,19 @@ class ControllerRequests:
                     east=request.east,
                     south=request.south
                 )
+                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
+
                 elevation_map_img = ImageGenerator.generate_elevation_map_img(
                     bounds)
+                
+                os.mkdir(save_path)
+                elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
+                #elevation_map_img = Image.open("unknovn.png")
                 qr_code_img = ImageGenerator.generate_qr_img(
                     f'{PATH_3D_WORLD}/{request.design_uuid}')
 
                 distorted_map_img = ImageGenerator.generate_distorted_map(
-                    h_map=elevation_map_img, img=f'{PATH_PUBLIC}/images/lines.png')
+                    h_map=f'{save_path}/elevation.png')
                 bottom_text = ImageGenerator.get_bottom_text()
                 design_img = ImageGenerator.generate_design_image(
                     location_name=request.title,
@@ -54,12 +61,9 @@ class ControllerRequests:
                     bottom_desc=bottom_text.description
                 )
 
-                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
-
-                os.mkdir(save_path)
-                elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
                 qr_code_img.save(f'{save_path}/qr.png', 'PNG')
                 design_img.save(f'{save_path}/design.png', 'PNG')
+                distorted_map_img.save(f'{save_path}/distorted_map.png', 'PNG')
 
                 request.edition_title = bottom_text.title
                 request.edition_desc = bottom_text.description
