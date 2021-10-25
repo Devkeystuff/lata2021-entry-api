@@ -26,15 +26,19 @@ class ImageGenerator():
     black = (0, 0, 0)
     lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
 
-    def generate_distorted_map(h_map: bytes, img, map_dimensions):
+    def generate_distorted_map(h_map, img):
         result = None
         try:
-            background = np.fromstring(h_map, dtype=np.uint8)
-            # te vajag zināt height map izmēru un vai tas ir RGB/RGBA
-            background = background.reshape(
-                (map_dimensions[0], map_dimensions[1], 3))
-            background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
+            img = cv2.imread(img, flags=cv2.IMREAD_UNCHANGED)
             img = cv2.resize(img, (810, 810), interpolation=cv2.INTER_AREA)
+
+            b_vidth, b_height = h_map.size
+            h_map_bytes = h_map.tobytes()
+            background = np.fromstring(h_map_bytes, dtype=np.uint8)
+            background = background.reshape(
+                (b_vidth,b_height, 4))
+
+            background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
             background = cv2.resize(background, (810, 810),
                                     interpolation=cv2.INTER_AREA)
             background = cv2.medianBlur(background, 21)
@@ -45,14 +49,7 @@ class ImageGenerator():
             # cycles trough each pixel
             for i in range(rows):
                 for j in range(cols):
-
-                    # gets rid of the darkest and brightest pixels
-                    if background[i, j] > 240:
-                        background[i, j] = 240
-                    elif background[i, j] < 15:
-                        background[i, j] = 15
-
-                    offset_y = int((background[i, j]-15)*0.35)
+                    offset_y = int((background[i, j]-15)*0.45)
                     # shifts the pixels upvards
                     if i+offset_y < rows:
                         result[i, j] = img[(i+offset_y) % rows, j]
@@ -60,6 +57,7 @@ class ImageGenerator():
                         result[i, j][0] = 0
 
             result = cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA)
+            result = Image.fromarray(result)
         except Exception as e:
             LoggingUtils.log_exception(e)
         return result
@@ -138,19 +136,13 @@ class ImageGenerator():
             d.rectangle((ImageGenerator.map_size[0]+45, 255,
                         ImageGenerator.map_size[0]+46, 300 + ImageGenerator.map_size[1]), fill=ImageGenerator.black)
 
-            # Add images
-            tobytes = b'\xbf\x8cd\xba\x7f\xe0\xf0\xb8t\xfe'
-
             offset = (1020, 1455)
             # te vajag zināt attēla dimensijas
-            code_r = Image.frombytes('RGB', (474, 266), qr_code_img, 'raw')
-            code_r = code_r.resize(ImageGenerator.code_size)
+            code_r = qr_code_img.resize(ImageGenerator.code_size)
             result.paste(code_r, offset)
 
             offset = (0, 300)
-            map_r = Image.frombytes('RGBA', (810, 810), ImageGenerator.generate_distorted_map(
-                map_img, ImageGenerator.lines), 'raw')
-            map_r = map_r.resize(ImageGenerator.map_size)
+            map_r = map_img.resize(ImageGenerator.map_size)
             result.paste(map_r, offset)
 
             # Add titles
