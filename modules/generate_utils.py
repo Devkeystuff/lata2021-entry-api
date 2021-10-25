@@ -26,35 +26,40 @@ class ImageGenerator():
     black = (0, 0, 0)
     lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
 
-    def generate_distorted_map(h_map, img):
+    def generate_distorted_map(h_map):
         result = None
         try:
-            img = cv2.imread(img, flags=cv2.IMREAD_UNCHANGED)
-            img = cv2.resize(img, (810, 810), interpolation=cv2.INTER_AREA)
-
-            b_vidth, b_height = h_map.size
-            h_map_bytes = h_map.tobytes()
-            background = np.fromstring(h_map_bytes, dtype=np.uint8)
-            background = background.reshape(
-                (b_vidth,b_height, 4))
-
+            #b_vidth, b_height = h_map.size
+            #h_map_bytes = h_map.tobytes()
+            #background = np.fromstring(h_map_bytes, dtype=np.uint8)
+            #background = background.reshape(
+            #    (b_height,b_vidth, 4))
+            background = cv2.imread(h_map)
             background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
-            background = cv2.resize(background, (810, 810),
+            cv2.imwrite("Test_background.png",background)
+
+            background = cv2.resize(background, (800, 800),
                                     interpolation=cv2.INTER_AREA)
             background = cv2.medianBlur(background, 21)
-            rows, cols = (810, 810)
+            rows, cols = (800, 800)
 
-            result = np.zeros((810, 810, 4), dtype=img.dtype)
+            result = np.zeros((800, 800, 4), dtype=np.uint8)
+            minVal, maxVal = cv2.minMaxLoc(background)[:2]
+            l_dist= (maxVal-minVal)
 
             # cycles trough each pixel
             for i in range(rows):
-                for j in range(cols):
-                    offset_y = int((background[i, j]-15)*0.45)
-                    # shifts the pixels upvards
-                    if i+offset_y < rows:
-                        result[i, j] = img[(i+offset_y) % rows, j]
-                    else:
-                        result[i, j][0] = 0
+                if not i%40:
+                    for j in range(cols):
+                        offset_y = int((background[i, j]-minVal)*(40/l_dist))
+                        if offset_y < int(l_dist/5):
+                            offset_y = int(l_dist/5)
+                        # shifts the pixels upvards
+                        if i+offset_y < rows:
+                            for line in range(0,5):
+                                result[i+offset_y-line, j] = [63,215,176,255]
+                        else:
+                            result[i, j][0] = 0
 
             result = cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA)
             result = Image.fromarray(result)
@@ -146,7 +151,7 @@ class ImageGenerator():
             result.paste(map_r, offset)
 
             # Add titles
-            d.text((ImageGenerator.im_size[0]/2, 120), anchor="mt", align="left",
+            d.text((ImageGenerator.im_size[0]/2, 215), anchor="mb", align="left",
                    text=location_name.upper(), font=ImageGenerator.title_font, fill=ImageGenerator.title_color)
             d.text((975, 1455), anchor="rt", align="center",
                    text=bottom_title.upper(), font=ImageGenerator.name_font, fill=ImageGenerator.black)
