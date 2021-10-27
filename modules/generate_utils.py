@@ -32,11 +32,11 @@ class ImageGenerator():
             #b_vidth, b_height = h_map.size
             #h_map_bytes = h_map.tobytes()
             #background = np.fromstring(h_map_bytes, dtype=np.uint8)
-            #background = background.reshape(
+            # background = background.reshape(
             #    (b_height,b_vidth, 4))
             background = cv2.imread(h_map)
             background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
-            cv2.imwrite("Test_background.png",background)
+            # cv2.imwrite("Test_background.png", background)
 
             background = cv2.resize(background, (800, 800),
                                     interpolation=cv2.INTER_AREA)
@@ -45,19 +45,20 @@ class ImageGenerator():
 
             result = np.zeros((800, 800, 4), dtype=np.uint8)
             minVal, maxVal = cv2.minMaxLoc(background)[:2]
-            l_dist= (maxVal-minVal)
+            l_dist = (maxVal-minVal)
 
             # cycles trough each pixel
             for i in range(rows):
-                if not i%40:
+                if not i % 40:
                     for j in range(cols):
                         offset_y = int((background[i, j]-minVal)*(40/l_dist))
                         if offset_y < int(l_dist/5):
                             offset_y = int(l_dist/5)
                         # shifts the pixels upvards
                         if i+offset_y < rows:
-                            for line in range(0,5):
-                                result[i+offset_y-line, j] = [63,215,176,255]
+                            for line in range(0, 5):
+                                result[i+offset_y-line,
+                                       j] = [63, 215, 176, 255]
                         else:
                             result[i, j][0] = 0
 

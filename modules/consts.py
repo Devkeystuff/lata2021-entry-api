@@ -1,6 +1,6 @@
-PATH_3D_WORLD = 'http://humboldt.herokuapp.com/places'
+PATH_3D_WORLD = 'http://humboldtapparel.herokuapp.com/places'
 
-HOST = 'http://localhost:8000'
+HOST = 'http://humboldt-api.herokuapp.com'
 
 PATH_PUBLIC = './public'
 PATH_STATIC = './static'
