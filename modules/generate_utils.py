@@ -40,7 +40,7 @@ class ImageGenerator():
             LoggingUtils.log_exception(e)
         return preview
 
-    def generate_distorted_map(h_map : String):
+    def generate_distorted_map(h_map: String):
         result = None
         try:
             #b_vidth, b_height = h_map.size
@@ -48,8 +48,6 @@ class ImageGenerator():
             #background = np.fromstring(h_map_bytes, dtype=np.uint8)
             # background = background.reshape(
             #    (b_height,b_vidth, 4))
-            print(h_map)
-            print("---------------------")
 
             background = cv2.imread(h_map)
             background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
@@ -191,7 +189,6 @@ class ImageGenerator():
                 side_text, ImageGenerator.text_font, ImageGenerator.black), (1200, 300))
         except Exception as e:
             LoggingUtils.log_exception(e)
-        print(type(result), 'design image')
         return result
 
     @staticmethod
@@ -209,10 +206,9 @@ class ImageGenerator():
             qr_code_img = qr.make_image(fill_color="black", back_color="white")
         except Exception as e:
             LoggingUtils.log_exception(e)
-        print(type(qr_code_img), 'qr_image')
         return qr_code_img
 
-    @ staticmethod
+    @staticmethod
     def generate_elevation_map_img(bounds: LatLngBounds):
         elevation_map_img = None
         try:
@@ -220,16 +216,15 @@ class ImageGenerator():
             res = requests.get(url)
             stream = io.BytesIO(res.content)
             elevation_map_img = Image.open(stream)
-            print(type(elevation_map_img))
         except Exception as e:
             LoggingUtils.log_exception(e)
         return elevation_map_img
 
-    @ staticmethod
+    @staticmethod
     def generate_normal_map_img(elevation_map: TiffImageFile):
         pass
 
-    @ staticmethod
+    @staticmethod
     def generate_elevation_map_img(bounds: LatLngBounds):
         elevation_map_img = None
         try:
@@ -237,11 +232,10 @@ class ImageGenerator():
             res = requests.get(url)
             stream = io.BytesIO(res.content)
             elevation_map_img = Image.open(stream)
-            print(type(elevation_map_img))
         except Exception as e:
             LoggingUtils.log_exception(e)
         return elevation_map_img
 
-    @ staticmethod
+    @staticmethod
     def generate_normal_map_img(elevation_map: TiffImageFile):
         pass
