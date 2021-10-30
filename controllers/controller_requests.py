@@ -46,7 +46,7 @@ class ControllerRequests:
 
                 os.mkdir(save_path)
                 elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
-                
+
                 qr_code_img = ImageGenerator.generate_qr_img(
                     f'{PATH_3D_WORLD}/{request.design_uuid}')
                 distorted_map_img = ImageGenerator.generate_distorted_map(
@@ -63,7 +63,8 @@ class ControllerRequests:
                 if not request.is_preview:
                     ControllerDatabase.insert_design(design=request)
                 else:
-                    preview = ImageGenerator.generate_preview(design_img, f'{PATH_PUBLIC}/images/shirt.png')
+                    preview = ImageGenerator.generate_preview(
+                        design_img, f'{PATH_PUBLIC}/images/shirt.png')
                     preview.save(f'{save_path}/preview.png', 'PNG')
 
                 design_img.save(f'{save_path}/design.png', 'PNG')
