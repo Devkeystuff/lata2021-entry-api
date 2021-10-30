@@ -1,4 +1,5 @@
 import io
+import PIL
 from PIL.TiffImagePlugin import TiffImageFile
 from PIL import Image, ImageDraw, ImageFont
 from marshmallow.fields import String
@@ -26,6 +27,18 @@ class ImageGenerator():
     name_font = ImageFont.truetype("public/fonts/ralevay_font.ttf", size=75)
     black = (0, 0, 0)
     lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
+
+    def generate_preview(design, shirt_img):
+        preview = None
+        try:
+            preview = Image.open(shirt_img)
+            design = design.resize((1070, 1400))
+            preview = preview.convert("RGBA")
+            design = design.convert("RGBA")
+            preview.paste(design, (450, 350), mask=design)
+        except Exception as e:
+            LoggingUtils.log_exception(e)
+        return preview
 
     def generate_distorted_map(h_map : String):
         result = None
@@ -149,6 +162,16 @@ class ImageGenerator():
             offset = (1020, 1455)
             # te vajag zināt attēla dimensijas
             code_r = qr_code_img.resize(ImageGenerator.code_size)
+            code_r = code_r.convert('RGBA')
+
+            newImage = []
+            for item in code_r.getdata():
+                if item[:3] == (255, 255, 255):
+                    newImage.append((255, 255, 255, 0))
+                else:
+                    newImage.append(item)
+
+            code_r.putdata(newImage)
             result.paste(code_r, offset)
 
             offset = (0, 300)
