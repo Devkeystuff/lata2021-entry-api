@@ -1,6 +1,7 @@
 import os
 import uuid
 from PIL import Image
+import PIL
 from fastapi import UploadFile
 from modules.generate_utils import ImageGenerator
 from modules.consts import HOST, PATH_3D_WORLD, PATH_PUBLIC, PATH_STATIC, PATH_STATIC_ABSOLUTE
@@ -32,6 +33,8 @@ class ControllerRequests:
                 request_uuid = str(uuid.uuid4())
                 request.design_uuid = request_uuid
 
+                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
+
                 bounds = LatLngBounds(
                     west=request.west,
                     north=request.north,
@@ -40,6 +43,10 @@ class ControllerRequests:
                 )
                 elevation_map_img = ImageGenerator.generate_elevation_map_img(
                     bounds)
+
+                os.mkdir(save_path)
+                elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
+                
                 qr_code_img = ImageGenerator.generate_qr_img(
                     f'{PATH_3D_WORLD}/{request.design_uuid}')
                 distorted_map_img = ImageGenerator.generate_distorted_map(
@@ -53,15 +60,14 @@ class ControllerRequests:
                     bottom_title=bottom_text.title,
                     bottom_desc=bottom_text.description
                 )
-
                 if not request.is_preview:
                     ControllerDatabase.insert_design(design=request)
+                else:
+                    preview = ImageGenerator.generate_preview(design_img, f'{PATH_PUBLIC}/images/shirt.png')
+                    preview.save(f'{save_path}/preview.png', 'PNG')
 
-                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
-                os.mkdir(save_path)
-                elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
-                qr_code_img.save(f'{save_path}/qr.png', 'PNG')
                 design_img.save(f'{save_path}/design.png', 'PNG')
+                qr_code_img.save(f'{save_path}/qr.png', 'PNG')
                 distorted_map_img.save(f'{save_path}/distorted_map.png', 'PNG')
 
                 request.edition_title = bottom_text.title
@@ -73,6 +79,7 @@ class ControllerRequests:
                 response.edition_title = bottom_text.title
                 response.edition_desc = bottom_text.description
                 response.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
+                response.shirt_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/preview.png'
                 response.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
                 response.lines_design_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/design.png'
                 response.design_uuid = request_uuid
