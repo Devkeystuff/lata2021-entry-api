@@ -1,6 +1,7 @@
 import io
 from PIL.TiffImagePlugin import TiffImageFile
 from PIL import Image, ImageDraw, ImageFont
+from marshmallow.fields import String
 from qrcode.image.pil import PilImage
 from models.common.design_bottom_text import DesignBottomText
 from models.common.lat_lng_bounds import LatLngBounds
@@ -26,7 +27,7 @@ class ImageGenerator():
     black = (0, 0, 0)
     lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
 
-    def generate_distorted_map(h_map):
+    def generate_distorted_map(h_map : String):
         result = None
         try:
             #b_vidth, b_height = h_map.size
@@ -34,6 +35,9 @@ class ImageGenerator():
             #background = np.fromstring(h_map_bytes, dtype=np.uint8)
             # background = background.reshape(
             #    (b_height,b_vidth, 4))
+            print(h_map)
+            print("---------------------")
+
             background = cv2.imread(h_map)
             background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
             # cv2.imwrite("Test_background.png", background)
