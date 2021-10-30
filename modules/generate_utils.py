@@ -1,6 +1,8 @@
 import io
+import PIL
 from PIL.TiffImagePlugin import TiffImageFile
 from PIL import Image, ImageDraw, ImageFont
+from marshmallow.fields import String
 from qrcode.image.pil import PilImage
 from models.common.design_bottom_text import DesignBottomText
 from models.common.lat_lng_bounds import LatLngBounds
@@ -26,7 +28,19 @@ class ImageGenerator():
     black = (0, 0, 0)
     lines = cv2.imread('public/images/lines.png', flags=cv2.IMREAD_UNCHANGED)
 
-    def generate_distorted_map(h_map):
+    def generate_preview(design, shirt_img):
+        preview = None
+        try:
+            preview = Image.open(shirt_img)
+            design = design.resize((1070, 1400))
+            preview = preview.convert("RGBA")
+            design = design.convert("RGBA")
+            preview.paste(design, (450, 350), mask=design)
+        except Exception as e:
+            LoggingUtils.log_exception(e)
+        return preview
+
+    def generate_distorted_map(h_map : String):
         result = None
         try:
             #b_vidth, b_height = h_map.size
@@ -34,6 +48,9 @@ class ImageGenerator():
             #background = np.fromstring(h_map_bytes, dtype=np.uint8)
             # background = background.reshape(
             #    (b_height,b_vidth, 4))
+            print(h_map)
+            print("---------------------")
+
             background = cv2.imread(h_map)
             background = cv2.cvtColor(background, cv2.COLOR_RGBA2GRAY)
             # cv2.imwrite("Test_background.png", background)
@@ -184,6 +201,23 @@ class ImageGenerator():
             LoggingUtils.log_exception(e)
         print(type(qr_code_img), 'qr_image')
         return qr_code_img
+
+    @ staticmethod
+    def generate_elevation_map_img(bounds: LatLngBounds):
+        elevation_map_img = None
+        try:
+            url = f'https://portal.opentopography.org/API/globaldem?demtype=SRTMGL3&south={bounds.south}&north={bounds.north}&west={bounds.west}&east={bounds.east}'
+            res = requests.get(url)
+            stream = io.BytesIO(res.content)
+            elevation_map_img = Image.open(stream)
+            print(type(elevation_map_img))
+        except Exception as e:
+            LoggingUtils.log_exception(e)
+        return elevation_map_img
+
+    @ staticmethod
+    def generate_normal_map_img(elevation_map: TiffImageFile):
+        pass
 
     @ staticmethod
     def generate_elevation_map_img(bounds: LatLngBounds):
