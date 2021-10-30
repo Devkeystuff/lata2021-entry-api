@@ -10,6 +10,7 @@ class MessageResponseGetDesign:
     title: str = ''
     description: str = ''
     qr_code_img: str = ''
+    shirt_img: str = ''
     elevation_map_img: str = ''
     lines_design_img: str = ''
     normal_map_img: str = ''
