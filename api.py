@@ -41,6 +41,7 @@ app.add_middleware(
 @app.post('/generate_design', response_model=MessageResponseGenerateDesign)
 async def generate_design(
     api_key: str = Query(...),
+    is_preview: bool = Query(...),
     title: str = Query(...),
     description: str = Query(...),
     west: float = Query(...),
@@ -52,6 +53,7 @@ async def generate_design(
     try:
         message_request_generate_design = MessageRequestGenerateDesign()
         message_request_generate_design.api_key = api_key
+        message_request_generate_design.is_preview = is_preview
         message_request_generate_design.title = title
         message_request_generate_design.description = description
         message_request_generate_design.west = west

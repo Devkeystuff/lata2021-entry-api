@@ -8,6 +8,7 @@ class MessageResponseGenerateDesign:
     design_id: int = 0
     design_uuid: str = ''
     qr_code_img: str = ''
+    shirt_img: str = ''
     elevation_map_img: str = ''
     lines_design_img: str = ''
     edition_title: str = ''

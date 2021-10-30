@@ -162,6 +162,16 @@ class ImageGenerator():
             offset = (1020, 1455)
             # te vajag zināt attēla dimensijas
             code_r = qr_code_img.resize(ImageGenerator.code_size)
+            code_r = code_r.convert('RGBA')
+
+            newImage = []
+            for item in code_r.getdata():
+                if item[:3] == (255, 255, 255):
+                    newImage.append((255, 255, 255, 0))
+                else:
+                    newImage.append(item)
+
+            code_r.putdata(newImage)
             result.paste(code_r, offset)
 
             offset = (0, 300)
