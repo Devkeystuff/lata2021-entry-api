@@ -38,17 +38,10 @@ class ControllerRequests:
                     east=request.east,
                     south=request.south
                 )
-                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
-
                 elevation_map_img = ImageGenerator.generate_elevation_map_img(
                     bounds)
-                
-                os.mkdir(save_path)
-                elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
-                #elevation_map_img = Image.open("unknovn.png")
                 qr_code_img = ImageGenerator.generate_qr_img(
                     f'{PATH_3D_WORLD}/{request.design_uuid}')
-
                 distorted_map_img = ImageGenerator.generate_distorted_map(
                     h_map=f'{save_path}/elevation.png')
                 bottom_text = ImageGenerator.get_bottom_text()
@@ -61,6 +54,12 @@ class ControllerRequests:
                     bottom_desc=bottom_text.description
                 )
 
+                if not request.is_preview:
+                    ControllerDatabase.insert_design(design=request)
+
+                save_path = f'{PATH_STATIC}/resources/{request_uuid}'
+                os.mkdir(save_path)
+                elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
                 qr_code_img.save(f'{save_path}/qr.png', 'PNG')
                 design_img.save(f'{save_path}/design.png', 'PNG')
                 distorted_map_img.save(f'{save_path}/distorted_map.png', 'PNG')
@@ -70,7 +69,6 @@ class ControllerRequests:
                 request.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
                 request.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
                 request.lines_design_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/design.png'
-                ControllerDatabase.insert_design(design=request)
 
                 response.edition_title = bottom_text.title
                 response.edition_desc = bottom_text.description
