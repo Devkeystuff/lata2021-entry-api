@@ -12,7 +12,7 @@ class DbDesign:
     description: str = ''
     qr_code_img: str = ''
     elevation_map_img: str = ''
-    lines_design_img: str = ''
+    shirt_img: str = ''
     edition_title: str = ''
     edition_desc: str = ''
     is_deleted: bool = False
