@@ -81,7 +81,6 @@ class ControllerRequests:
                 response.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
                 response.shirt_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/preview.png'
                 response.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
-                response.shirt_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/design.png'
                 response.design_uuid = request_uuid
                 response.is_success = True
         except Exception as e:
