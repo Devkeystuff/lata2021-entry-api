@@ -46,7 +46,7 @@ class ControllerRequests:
 
                 os.mkdir(save_path)
                 elevation_map_img.save(f'{save_path}/elevation.png', 'PNG')
-                
+
                 qr_code_img = ImageGenerator.generate_qr_img(
                     f'{PATH_3D_WORLD}/{request.design_uuid}')
                 distorted_map_img = ImageGenerator.generate_distorted_map(
@@ -60,12 +60,10 @@ class ControllerRequests:
                     bottom_title=bottom_text.title,
                     bottom_desc=bottom_text.description
                 )
-                if not request.is_preview:
-                    ControllerDatabase.insert_design(design=request)
-                else:
-                    preview = ImageGenerator.generate_preview(design_img, f'{PATH_PUBLIC}/images/shirt.png')
-                    preview.save(f'{save_path}/preview.png', 'PNG')
+                preview = ImageGenerator.generate_preview(
+                    design_img, f'{PATH_PUBLIC}/images/shirt.png')
 
+                preview.save(f'{save_path}/preview.png', 'PNG')
                 design_img.save(f'{save_path}/design.png', 'PNG')
                 qr_code_img.save(f'{save_path}/qr.png', 'PNG')
                 distorted_map_img.save(f'{save_path}/distorted_map.png', 'PNG')
@@ -74,14 +72,15 @@ class ControllerRequests:
                 request.edition_desc = bottom_text.description
                 request.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
                 request.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
-                request.lines_design_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/design.png'
+                request.shirt_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/preview.png'
+
+                ControllerDatabase.insert_design(design=request)
 
                 response.edition_title = bottom_text.title
                 response.edition_desc = bottom_text.description
                 response.qr_code_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/qr.png'
                 response.shirt_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/preview.png'
                 response.elevation_map_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/elevation.png'
-                response.lines_design_img = f'{PATH_STATIC_ABSOLUTE}/resources/{request_uuid}/design.png'
                 response.design_uuid = request_uuid
                 response.is_success = True
         except Exception as e:
@@ -100,7 +99,7 @@ class ControllerRequests:
                 response.design_uuid = design.design_uuid
                 response.qr_code_img = design.qr_code_img
                 response.elevation_map_img = design.elevation_map_img
-                response.lines_design_img = design.lines_design_img
+                response.shirt_img = design.shirt_img
                 response.title = design.title
                 response.description = design.description
                 response.edition_title = design.edition_title

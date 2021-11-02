@@ -12,7 +12,6 @@ class MessageResponseGetDesign:
     qr_code_img: str = ''
     shirt_img: str = ''
     elevation_map_img: str = ''
-    lines_design_img: str = ''
     normal_map_img: str = ''
     is_success: bool = False
     edition_title: str = ''

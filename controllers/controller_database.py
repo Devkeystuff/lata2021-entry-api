@@ -18,7 +18,7 @@ class ControllerDatabase:
                 'design_uuid',
                 'qr_code_img',
                 'elevation_map_img',
-                'lines_design_img',
+                'shirt_img',
                 'title',
                 'description',
                 'edition_title',
@@ -84,7 +84,7 @@ class ControllerDatabase:
                     f'description, '
                     f'qr_code_img, '
                     f'elevation_map_img, '
-                    f'lines_design_img, '
+                    f'shirt_img, '
                     f'edition_title, '
                     f'edition_desc '
                     f'FROM designs '
@@ -98,7 +98,6 @@ class ControllerDatabase:
                 row = cursor.fetchone()
                 if row:
                     columns = [it[0] for it in cursor.description]
-                    print(columns)
                     design_dict = dict(zip(columns, row))
                     design = from_dict(
                         data_class=DbDesign,
