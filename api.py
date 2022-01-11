@@ -1,5 +1,4 @@
 import argparse
-import uvicorn
 from fastapi import FastAPI, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -86,11 +85,3 @@ async def get_design(
     except Exception as e:
         LoggingUtils.log_exception(e)
     return response
-
-if __name__ == '__main__':
-    uvicorn.run(
-        'api:app',
-        debug=args.debug,
-        reload=args.debug,
-        workers=args.workers
-    )
